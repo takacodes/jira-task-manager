@@ -26,7 +26,10 @@ const columns = [
   { key: "created", label: "Created" },
   { key: "sprint", label: "Sprint" },
   { key: "url", label: "URL" },
+  { key: "log", label: "Log" },
 ];
+
+import JiraLogModal from './components/JiraLogModal';
 
 const App: React.FC = () => {
   const [data, setData] = useState<JiraTask[]>([]);
@@ -35,6 +38,7 @@ const App: React.FC = () => {
   const [sortAsc, setSortAsc] = useState<boolean>(true);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+  const [modalIssueId, setModalIssueId] = useState<string | null>(null);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -126,6 +130,12 @@ const App: React.FC = () => {
           sortKey={sortKey}
           sortAsc={sortAsc}
           onSort={handleSort}
+          theme={theme}
+          onLogHover={setModalIssueId}
+        />
+        <JiraLogModal
+          issueId={modalIssueId}
+          onClose={() => setModalIssueId(null)}
           theme={theme}
         />
       </main>

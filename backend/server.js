@@ -69,4 +69,48 @@ app.get('/api/jira-tasks', async (req, res) => {
     });
   }
 });
+
+// New endpoint to fetch issue changelog
+app.get('/api/jira-issue/:id', async (req, res) => {
+  try {
+    const issueId = req.params.id;
+    const url = `${JIRA_DOMAIN}/rest/api/3/issue/${issueId}?expand=changelog`;
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': 'Basic ' + Buffer.from(`${JIRA_EMAIL}:${JIRA_API_TOKEN}`).toString('base64'),
+        'Accept': 'application/json',
+      },
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: data.errorMessages ? data.errorMessages.join(', ') : data.error || 'Unknown Jira error',
+        status: response.status,
+        jira: data,
+      });
+    }
+    // Return changelog, updated, summary, and description fields
+    res.json({
+      updated: data.fields.updated,
+      changelog: data.changelog,
+      key: data.key,
+      summary: data.fields.summary,
+      description: typeof data.fields.description === 'string' ? data.fields.description : (data.fields.description?.content ? extractJiraDescription(data.fields.description) : ''),
+    });
+
+    // Helper to extract plain text from Jira's new format (if present)
+    function extractJiraDescription(descObj) {
+      if (!descObj || !descObj.content) return '';
+      return descObj.content.map(block => {
+        if (block.content) {
+          return block.content.map(inline => inline.text || '').join('');
+        }
+        return '';
+      }).join('\n');
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch Jira issue', details: err instanceof Error ? err.message : String(err) });
+  }
+});
+
 app.listen(3001, () => console.log('Proxy listening on port 3001'));

@@ -20,9 +20,10 @@ interface JiraTableProps {
   sortAsc: boolean;
   onSort: (key: string) => void;
   theme: 'light' | 'dark';
+  onLogHover?: (issueId: string) => void;
 }
 
-const JiraTable: React.FC<JiraTableProps> = ({ data, error, columns, sortKey, sortAsc, onSort, theme }) => (
+const JiraTable: React.FC<JiraTableProps> = ({ data, error, columns, sortKey, sortAsc, onSort, theme, onLogHover }) => (
   <div className="w-full max-w-[90vw] p-6 relative">
     {error && (
       <div className={`mb-4 p-4 rounded border ${theme === "light" ? "bg-red-100 text-red-700 border-red-300" : "bg-red-900 text-red-200 border-red-700"}`}>
@@ -67,6 +68,16 @@ const JiraTable: React.FC<JiraTableProps> = ({ data, error, columns, sortKey, so
               >
                 <FiLink className="w-5 h-5" />
               </a>
+            </td>
+            {/* Log column */}
+            <td className="py-4 px-2">
+              <button
+                className={`rounded-full px-3 py-1 text-xs font-bold shadow transition ${theme === 'light' ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-gray-700 text-blue-200 hover:bg-gray-800'}`}
+                onClick={() => onLogHover && onLogHover(item.id)}
+                title="Show log"
+              >
+                Log
+              </button>
             </td>
           </tr>
         ))}
