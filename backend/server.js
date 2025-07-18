@@ -12,7 +12,7 @@ const JIRA_API_TOKEN = process.env.JIRA_API_TOKEN;
 
 app.get('/api/jira-tasks', async (req, res) => {
   try {
-    const filterId = rocess.env.JIRA_FILTER_ID;
+    const filterId = process.env.JIRA_FILTER_ID;
     const filterRes = await fetch(
       `${JIRA_DOMAIN}/rest/api/3/filter/${filterId}`,
       {
