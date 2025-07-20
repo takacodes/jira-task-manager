@@ -34,15 +34,13 @@ import JiraLogModal from './components/JiraLogModal';
 const App: React.FC = () => {
   const [data, setData] = useState<JiraTask[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [sortKey, setSortKey] = useState<string>("id");
-  const [sortAsc, setSortAsc] = useState<boolean>(true);
+  const [sortKey, setSortKey] = useState<string>("updated");
+  const [sortAsc, setSortAsc] = useState<boolean>(false);
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [modalIssueId, setModalIssueId] = useState<string | null>(null);
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-
     const fetchTasks = async () => {
       try {
         const res = await fetch('http://localhost:3001/api/jira-tasks');
@@ -75,6 +73,10 @@ const App: React.FC = () => {
       }
     };
     fetchTasks();
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   const sortedData = [...data].sort((a, b) => {

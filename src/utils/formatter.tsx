@@ -1,3 +1,13 @@
+// Removes excessive blank lines and multiple spaces from text
+export function compactText(text: string): string {
+  if (!text) return '';
+  // Replace multiple blank lines with a single newline
+  let cleaned = text.replace(/([\r\n]+\s*){2,}/g, '\n');
+  // Replace multiple spaces with a single space
+  cleaned = cleaned.replace(/ +/g, ' ');
+  // Trim leading/trailing whitespace
+  return cleaned.trim();
+}
 import { formatDistanceToNow } from 'date-fns';
 
 export const formatDate = (dateStr: string) => {

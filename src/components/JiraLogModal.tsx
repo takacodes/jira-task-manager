@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { jiraMarkupToHtml } from '../utils/formatter';
+import { jiraMarkupToHtml, compactText } from '../utils/formatter';
 
 interface JiraLogModalProps {
   issueId: string | null;
@@ -33,7 +33,9 @@ const JiraLogModal: React.FC<JiraLogModalProps> = ({ issueId, onClose, theme }) 
   const [log, setLog] = React.useState<JiraLogData | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
+
   useEffect(() => {
+    setLog(null); // Clear previous content immediately
     if (!issueId) return;
     setLoading(true);
     setError(null);
@@ -49,11 +51,24 @@ const JiraLogModal: React.FC<JiraLogModalProps> = ({ issueId, onClose, theme }) 
       });
   }, [issueId]);
 
+  // Always run Escape key effect
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!issueId) return null;
 
+  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (e.target === e.currentTarget) onClose();
+  }
+
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40`}>
-      <div className={`rounded-xl shadow-xl p-8 max-w-lg w-full ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-900 text-gray-100'}`}>
+    <div className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40`} onClick={handleBackdropClick}>
+      <div className={`rounded-xl shadow-xl p-16 max-w-5xl w-full max-h-screen overflow-y-auto ${theme === 'light' ? 'bg-white text-gray-800' : 'bg-gray-900 text-gray-100'}`}>
         <button
           className={`absolute top-4 right-6 text-2xl font-bold ${theme === 'light' ? 'text-gray-700' : 'text-gray-200'}`}
           onClick={onClose}
@@ -66,11 +81,11 @@ const JiraLogModal: React.FC<JiraLogModalProps> = ({ issueId, onClose, theme }) 
           <div>
             <div className="mb-2 font-semibold">Last Updated: {new Date(log.updated).toLocaleString()}</div>
             <div className="mb-2 font-semibold">Summary:</div>
-            <div className="mb-2" dangerouslySetInnerHTML={{ __html: jiraMarkupToHtml(log.summary) }} />
+            <div className="mb-2 whitespace-pre-line">{compactText(log.summary)}</div>
             {log.description && (
               <>
                 <div className="mb-2 font-semibold">Description:</div>
-                <div className="mb-2" dangerouslySetInnerHTML={{ __html: jiraMarkupToHtml(log.description) }} />
+                <div className="mb-2 whitespace-pre-line">{compactText(log.description)}</div>
               </>
             )}
             <div className="mb-2 font-semibold">Changelog:</div>
